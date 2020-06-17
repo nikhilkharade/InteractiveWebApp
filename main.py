@@ -1,3 +1,4 @@
+# pylint: disable=E1120 
 import streamlit as st
 from sklearn import datasets
 import numpy as np
@@ -8,14 +9,16 @@ from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score
 from sklearn.decomposition import PCA
 import matplotlib.pyplot as plt
+from sklearn.tree import DecisionTreeClassifier
+
 st.title("SKLearn Classifier Visualization")
 st.write("""
 Details of the website are given here along with accuracy and the classifier used:
 """)
 st.write("")
 
-dataset_name = st.sidebar.selectbox("Select Dataset" , ("Iris Dataset","Breast Cancer Dataset" , "Wine Dataset"))
-classifier_name = st.sidebar.selectbox("Select Classifier" , ("KNN","SVM" , "Random Forest"))
+dataset_name = st.sidebar.selectbox("Select Dataset" , ("Iris Dataset","Breast Cancer Dataset" , "Wine Dataset " , "Diabetes Dataset" ))
+classifier_name = st.sidebar.selectbox("Select Classifier" , ("KNN","SVM" , "Random Forest" , "Decision Tree Classifier"))
 
 
 def get_dataset(dataset_name):
@@ -23,6 +26,8 @@ def get_dataset(dataset_name):
         data = datasets.load_iris()
     elif dataset_name == 'Breast Cancer Dataset':
         data = datasets.load_breast_cancer()
+    elif dataset_name == 'Diabetes Dataset':
+        data = datasets.load_diabetes()
     else:
         data = datasets.load_wine()
     X = data.data
@@ -41,6 +46,15 @@ def add_parameter_ui(clf_name):
     elif  clf_name =='SVM':
          C = st.sidebar.slider("C" , 0.1 , 10.0)
          params["C"] = C
+
+    elif clf_name == 'Decision Tree Classifier':
+        #random_state = st.sidebar.slider("Random State" , 0 , 10)
+        max_depth1 = st.sidebar.slider("Max depth" , 2 , 15)
+        minSampleSplit = st.sidebar.slider("Minimum Sample Split" , 2 , 10)
+        #params['random_state'] = random_state
+        params['max_depth1'] = max_depth1
+        params['minSampleSplit'] = minSampleSplit
+
     else:
         max_depth = st.sidebar.slider("Max depth" , 2 , 15)
         numberOfEstimators = st.sidebar.slider("Number of estimators" , 1 , 100)
@@ -58,6 +72,10 @@ def get_classifier(clf_name,params):
         clf = KNeighborsClassifier(n_neighbors=params["K"])
     elif  clf_name =='SVM':
          clf = SVC(C=params["C"])
+    
+    elif clf_name == 'Decision Tree Classifier':
+        clf = DecisionTreeClassifier(random_state=1234,
+        max_depth=params["max_depth1"] , min_samples_split=params['minSampleSplit'])
     else:
         clf = RandomForestClassifier(n_estimators=params["numberofestimators"],
         max_depth=params["max_depth"] , random_state=1234)
